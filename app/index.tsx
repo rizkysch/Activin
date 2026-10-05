@@ -7,8 +7,9 @@ import {
   View,
 } from "react-native";
 
+import Ionicons from "@expo/vector-icons/Ionicons";
+import ActivityCard from "../components/ActivityCard";
 import { activities } from "../data/activity";
-import ActivityCard from "../components/ActivtyCard";
 
 export default function Index() {
   const [search, setSearch] = useState("");
@@ -28,18 +29,29 @@ export default function Index() {
 
   return (
     <View style={{ flex: 1, padding: 16 }}>
-      <TextInput
-        placeholder="Search Activity..."
-        value={search}
-        onChangeText={setSearch}
+      <View
         style={{
+          flexDirection: "row",
+          alignItems: "center",
           borderWidth: 1,
           borderColor: "#ccc",
           borderRadius: 8,
-          padding: 12,
+          paddingHorizontal: 12,
           marginBottom: 16,
         }}
-      />
+      >
+        <Ionicons name="search" size={18} color="#666" />
+        <TextInput
+          placeholder="Search Activity..."
+          value={search}
+          onChangeText={setSearch}
+          style={{
+            flex: 1,
+            paddingVertical: 12,
+            paddingLeft: 8,
+          }}
+        />
+      </View>
 
       <View
         style={{
