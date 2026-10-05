@@ -26,7 +26,6 @@ export default function Index() {
     return matchSearch && matchCategory;
   });
 
-export default function Index() {
   return (
     <View style={{ flex: 1, padding: 16 }}>
       <TextInput
@@ -83,3 +82,4 @@ export default function Index() {
     </View>
   );
 }
+
