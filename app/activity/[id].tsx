@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
   },
   category: {
     fontSize: 14,
-    color: "#666",
+    color: "#1a0bef",
     fontWeight: "600",
     marginBottom: 8,
   },
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
   },
   metaLabel: {
     fontSize: 12,
-    color: "#666",
+    color: "#fa0909",
     marginBottom: 4,
   },
   metaValue: {
@@ -128,13 +128,13 @@ const styles = StyleSheet.create({
   },
   joinButton: {
     marginTop: 8,
-    backgroundColor: "#2f80ed",
+    backgroundColor: "#0f6ce4",
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: "center",
   },
   joinButtonDisabled: {
-    backgroundColor: "#bdbdbd",
+    backgroundColor: "#ff0000",
   },
   joinButtonText: {
     color: "white",

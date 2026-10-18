@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FlatList,
   Pressable,
@@ -9,16 +9,44 @@ import {
 
 import Ionicons from "@expo/vector-icons/Ionicons";
 import ActivityCard from "../components/ActivityCard";
-import { activities } from "../data/activity";
+import { activities as initialActivities } from "../data/activity";
+import { Activity } from "../types/activity";
 
 export default function Index() {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadActivities = async () => {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      const loadedActivities = await Promise.resolve(initialActivities);
+      if (!isMounted) return;
+
+      setActivities(loadedActivities);
+      setIsLoading(false);
+    };
+
+    void loadActivities();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const categories = [
+    "All",
+    ...new Set(activities.map((activity) => activity.category)),
+  ];
+
+  const normalizedSearch = search.trim().toLowerCase();
   const filteredActivities = activities.filter((activity) => {
     const matchSearch = activity.title
       .toLowerCase()
-      .includes(search.toLowerCase());
+      .includes(normalizedSearch);
 
     const matchCategory =
       selectedCategory === "All" ||
@@ -34,13 +62,13 @@ export default function Index() {
           flexDirection: "row",
           alignItems: "center",
           borderWidth: 1,
-          borderColor: "#ccc",
+          borderColor: "#eb0909",
           borderRadius: 8,
           paddingHorizontal: 12,
           marginBottom: 16,
         }}
       >
-        <Ionicons name="search" size={18} color="#666" />
+        <Ionicons name="search" size={18} color="#ff0606" />
         <TextInput
           placeholder="Search Activity..."
           value={search}
@@ -60,7 +88,7 @@ export default function Index() {
           gap: 8,
         }}
       >
-        {["All", "Movie", "Food", "Sport"].map((category) => (
+        {categories.map((category) => (
           <Pressable
             key={category}
             onPress={() => setSelectedCategory(category)}
@@ -69,7 +97,7 @@ export default function Index() {
               paddingHorizontal: 12,
               borderRadius: 8,
               backgroundColor:
-                selectedCategory === category ? "#333" : "#eee",
+                selectedCategory === category ? "#060606" : "#f30404",
             }}
           >
             <Text
@@ -84,14 +112,16 @@ export default function Index() {
         ))}
       </View>
 
-      <FlatList
-        data={filteredActivities}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <ActivityCard activity={item} />
-        )}
-      />
+      {isLoading ? (
+        <Text>Loading activities...</Text>
+      ) : (
+        <FlatList
+          data={filteredActivities}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => <ActivityCard activity={item} />}
+          ListEmptyComponent={<Text>No activities found.</Text>}
+        />
+      )}
     </View>
   );
 }
-
