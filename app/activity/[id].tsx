@@ -17,12 +17,15 @@ export default function ActivityDetailScreen() {
   const [isJoined, setIsJoined] = useState(false);
   const [participants, setParticipants] = useState(activity?.participants ?? 0);
 
+  const handleGoBack = () => router.back();
+  const handleGoHome = () => router.replace("/");
+
   if (!activity) {
     return (
       <View style={styles.emptyState}>
         <Text style={styles.emptyTitle}>Activity not found</Text>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Text style={styles.backButtonText}>Back</Text>
+        <Pressable onPress={handleGoHome} style={styles.backButton}>
+          <Text style={styles.backButtonText}>Back to Home</Text>
         </Pressable>
       </View>
     );
@@ -78,7 +81,7 @@ export default function ActivityDetailScreen() {
         </Text>
       </Pressable>
 
-      <Pressable onPress={() => router.back()} style={styles.backButton}>
+      <Pressable onPress={handleGoBack} style={styles.backButton}>
         <Text style={styles.backButtonText}>Back</Text>
       </Pressable>
     </ScrollView>
@@ -102,7 +105,7 @@ const styles = StyleSheet.create({
   },
   category: {
     fontSize: 14,
-    color: "#1a0bef",
+    color: "#4f46e5",
     fontWeight: "600",
     marginBottom: 8,
   },
@@ -110,6 +113,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "bold",
     marginBottom: 16,
+    color: "#111827",
   },
   metaBox: {
     backgroundColor: "white",
@@ -119,7 +123,7 @@ const styles = StyleSheet.create({
   },
   metaLabel: {
     fontSize: 12,
-    color: "#fa0909",
+    color: "#6b7280",
     marginBottom: 4,
   },
   metaValue: {
@@ -134,7 +138,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   joinButtonDisabled: {
-    backgroundColor: "#ff0000",
+    backgroundColor: "#9ca3af",
   },
   joinButtonText: {
     color: "white",
