@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   AppState,
+  ActivityIndicator,
   FlatList,
   KeyboardAvoidingView,
   Platform,
@@ -16,11 +17,29 @@ import { fetchMalangWeather } from "../data/weather";
 import { Activity } from "../types/activity";
 import { Weather } from "../types/weather";
 
+async function loadActivitiesAsync(): Promise<Activity[]> {
+  await new Promise<void>((resolve) => setTimeout(resolve, 500));
+  return initialActivities;
+}
+
+async function runCustomAsyncFunction(input: string): Promise<string> {
+  await new Promise<void>((resolve) => setTimeout(resolve, 2000));
+  return `Tugas "${input}" berhasil ditambahkan di latar belakang.`;
+}
+
 export default function Index() {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [activities, setActivities] = useState<Activity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isReloadingActivities, setIsReloadingActivities] = useState(false);
+  const [activityReloadError, setActivityReloadError] = useState<string | null>(
+    null,
+  );
+  const [customTask, setCustomTask] = useState("");
+  const [isRunningCustomTask, setIsRunningCustomTask] = useState(false);
+  const [customTaskResult, setCustomTaskResult] = useState<string | null>(null);
+  const [customTaskError, setCustomTaskError] = useState<string | null>(null);
   const [weather, setWeather] = useState<Weather | null>(null);
   const [weatherError, setWeatherError] = useState<string | null>(null);
   const [weatherReloadKey, setWeatherReloadKey] = useState(0);
@@ -30,8 +49,7 @@ export default function Index() {
     let isMounted = true;
 
     const loadActivities = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      const loadedActivities = await Promise.resolve(initialActivities);
+      const loadedActivities = await loadActivitiesAsync();
       if (!isMounted) return;
 
       setActivities(loadedActivities);
@@ -44,6 +62,44 @@ export default function Index() {
       isMounted = false;
     };
   }, []);
+
+  const handleRunCustomTask = async () => {
+    const input = customTask.trim();
+    if (!input) {
+      setCustomTaskResult(null);
+      setCustomTaskError("Masukkan tugas sebelum menjalankan fungsi.");
+      return;
+    }
+
+    setIsRunningCustomTask(true);
+    setCustomTaskError(null);
+    setCustomTaskResult(null);
+    try {
+      setCustomTaskResult(await runCustomAsyncFunction(input));
+    } catch (error) {
+      setCustomTaskError(
+        error instanceof Error ? error.message : "Custom task gagal dijalankan.",
+      );
+    } finally {
+      setIsRunningCustomTask(false);
+    }
+  };
+
+  const handleReloadActivities = async () => {
+    setIsReloadingActivities(true);
+    setActivityReloadError(null);
+    try {
+      setActivities(await loadActivitiesAsync());
+    } catch (error) {
+      setActivityReloadError(
+        error instanceof Error
+          ? error.message
+          : "Gagal memuat ulang aktivitas.",
+      );
+    } finally {
+      setIsReloadingActivities(false);
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -154,16 +210,6 @@ export default function Index() {
             <Text style={{ marginTop: 4, fontSize: 12, color: "#6b7280" }}>
               Diperbarui otomatis tiap 15 menit saat aplikasi aktif.
             </Text>
-            <Pressable
-              accessibilityRole="button"
-              disabled={isRefreshingWeather}
-              onPress={() => setWeatherReloadKey((current) => current + 1)}
-              style={{ alignSelf: "flex-start", marginTop: 8 }}
-            >
-              <Text style={{ color: "#2f80ed", fontWeight: "600" }}>
-                {isRefreshingWeather ? "Memperbarui..." : "Perbarui sekarang"}
-              </Text>
-            </Pressable>
             {weatherError ? (
               <Text style={{ marginTop: 4, color: "#b91c1c" }}>
                 Gagal memperbarui. Menampilkan data terakhir yang berhasil:
@@ -190,6 +236,122 @@ export default function Index() {
             Memuat data cuaca...
           </Text>
         )}
+      </View>
+      <View
+        style={{
+          marginBottom: 16,
+          padding: 14,
+          borderRadius: 12,
+          backgroundColor: "white",
+        }}
+      >
+        <Text style={{ fontSize: 18, fontWeight: "700", color: "#111827" }}>
+          Async Functions
+        </Text>
+        <Text style={{ marginTop: 10, fontWeight: "600", color: "#374151" }}>
+          Custom Async Function
+        </Text>
+        <TextInput
+          accessibilityLabel="Tugas custom async"
+          placeholder="Masukkan tugas custom..."
+          placeholderTextColor="#9ca3af"
+          value={customTask}
+          onChangeText={(value) => {
+            setCustomTask(value);
+            setCustomTaskError(null);
+            setCustomTaskResult(null);
+          }}
+          returnKeyType="done"
+          onSubmitEditing={() => void handleRunCustomTask()}
+          style={{
+            marginTop: 8,
+            minHeight: 44,
+            paddingHorizontal: 12,
+            borderWidth: 1,
+            borderColor: "#d1d5db",
+            borderRadius: 8,
+            color: "#111827",
+          }}
+        />
+        <Pressable
+          accessibilityRole="button"
+          disabled={isRunningCustomTask}
+          onPress={() => void handleRunCustomTask()}
+          style={{
+            alignSelf: "flex-start",
+            marginTop: 8,
+            paddingVertical: 8,
+            paddingHorizontal: 12,
+            borderRadius: 8,
+            backgroundColor: isRunningCustomTask ? "#93c5fd" : "#2f80ed",
+          }}
+        >
+          <Text style={{ color: "white", fontWeight: "600" }}>
+            {isRunningCustomTask ? "Menjalankan..." : "Jalankan custom task"}
+          </Text>
+        </Pressable>
+        {customTaskResult ? (
+          <Text style={{ marginTop: 8, color: "#166534" }}>
+            {customTaskResult}
+          </Text>
+        ) : null}
+        {customTaskError ? (
+          <Text style={{ marginTop: 8, color: "#b91c1c" }}>
+            {customTaskError}
+          </Text>
+        ) : null}
+        <Text style={{ marginTop: 14, fontWeight: "600", color: "#374151" }}>
+          Pre-built Async Functions
+        </Text>
+        <View
+          style={{
+            flexDirection: "row",
+            flexWrap: "wrap",
+            gap: 8,
+            marginTop: 8,
+          }}
+        >
+          <Pressable
+            accessibilityRole="button"
+            disabled={isReloadingActivities}
+            onPress={() => void handleReloadActivities()}
+            style={{
+              paddingVertical: 8,
+              paddingHorizontal: 12,
+              borderRadius: 8,
+              backgroundColor: "#e5e7eb",
+            }}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              {isReloadingActivities ? (
+                <ActivityIndicator size="small" color="#2f80ed" />
+              ) : null}
+              <Text style={{ color: "#374151", fontWeight: "600" }}>
+                {isReloadingActivities ? "Memuat..." : "Muat ulang aktivitas"}
+              </Text>
+            </View>
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            disabled={isRefreshingWeather}
+            onPress={() => setWeatherReloadKey((current) => current + 1)}
+            style={{
+              paddingVertical: 8,
+              paddingHorizontal: 12,
+              borderRadius: 8,
+              backgroundColor: "#e5e7eb",
+            }}
+          >
+            <Text style={{ color: "#374151", fontWeight: "600" }}>
+              {isRefreshingWeather ? "Memperbarui cuaca..." : "Perbarui cuaca"}
+            </Text>
+          </Pressable>
+        </View>
+        {activityReloadError ? (
+          <Text style={{ marginTop: 8, color: "#b91c1c" }}>
+            {activityReloadError}
+          </Text>
+        ) : null}
       </View>
       <View
         style={{
