@@ -52,6 +52,7 @@ function describeWeatherCode(code: number): string {
 }
 
 export async function fetchMalangWeather(): Promise<Weather> {
+  // Pre-built Async Function: fetch() requests current weather data from Open-Meteo.
   const response = await fetch(MALANG_WEATHER_URL);
   if (!response.ok) {
     throw new Error(`Gagal mengambil cuaca Malang (HTTP ${response.status}).`);
