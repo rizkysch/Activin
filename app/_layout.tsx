@@ -19,10 +19,6 @@ export default function RootLayout() {
     >
       <Stack.Screen name="index" options={{ title: "Aktivitas" }} />
       <Stack.Screen
-        name="api-demo"
-        options={{ title: "External API" }}
-      />
-      <Stack.Screen
         name="activity/[id]"
         options={{ title: "Detail Aktivitas" }}
       />

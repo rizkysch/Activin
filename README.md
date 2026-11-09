@@ -2,13 +2,6 @@
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
-## External API demo
-
-Open **Lihat Data dari External API** on the home screen to fetch posts from
-[JSONPlaceholder](https://jsonplaceholder.typicode.com/posts). The response is
-validated and represented as `Post` objects using the interface in
-`types/post.ts`.
-
 ## Get started
 
 1. Install dependencies
