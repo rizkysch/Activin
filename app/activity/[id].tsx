@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Image,
   Pressable,
   ScrollView,
@@ -9,21 +10,58 @@ import {
 } from "react-native";
 
 import { router, useLocalSearchParams } from "expo-router";
-import { activities } from "../../data/activity";
+import { fetchActivities } from "../../data/activity";
+import { Activity } from "../../types/activity";
 
 export default function ActivityDetailScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
-  const activity = activities.find((item) => item.id.toString() === id);
+  const [activity, setActivity] = useState<Activity | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [isJoined, setIsJoined] = useState(false);
-  const [participants, setParticipants] = useState(activity?.participants ?? 0);
+  const [participants, setParticipants] = useState(0);
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadActivity = async () => {
+      try {
+        const allActivities = await fetchActivities();
+        const foundActivity = allActivities.find((item) => item.id.toString() === id);
+        if (isMounted) {
+          setActivity(foundActivity ?? null);
+          setParticipants(foundActivity?.participants ?? 0);
+          setLoadError(null);
+        }
+      } catch (error) {
+        if (isMounted) {
+          setLoadError(error instanceof Error ? error.message : "Gagal memuat aktivitas.");
+        }
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+    void loadActivity();
+    return () => { isMounted = false; };
+  }, [id]);
 
   const handleGoBack = () => router.back();
   const handleGoHome = () => router.replace("/");
 
+  if (isLoading) {
+    return (
+      <View style={styles.emptyState}>
+        <ActivityIndicator color="#2f80ed" />
+        <Text style={styles.emptyTitle}>Memuat detail aktivitas...</Text>
+      </View>
+    );
+  }
+
   if (!activity) {
     return (
       <View style={styles.emptyState}>
-        <Text style={styles.emptyTitle}>Activity not found</Text>
+        <Text style={styles.emptyTitle}>
+          {loadError ?? "Aktivitas tidak ditemukan"}
+        </Text>
         <Pressable onPress={handleGoHome} style={styles.backButton}>
           <Text style={styles.backButtonText}>Back to Home</Text>
         </Pressable>

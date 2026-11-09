@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FlatList,
   Pressable,
@@ -9,11 +9,23 @@ import {
 
 import Ionicons from "@expo/vector-icons/Ionicons";
 import ActivityCard from "../../components/ActivityCard";
-import { activities } from "../../data/activity";
+import { fetchActivities } from "../../data/activity";
+import { Activity } from "../../types/activity";
 
 export default function ActivityDemoScreen() {
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+
+  useEffect(() => {
+    let isMounted = true;
+    void fetchActivities().then((items) => {
+      if (isMounted) setActivities(items);
+    }).catch(() => {
+      if (isMounted) setActivities([]);
+    });
+    return () => { isMounted = false; };
+  }, []);
 
   const categories = [
     "All",
