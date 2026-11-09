@@ -8,11 +8,13 @@ import {
 } from "react-native";
 
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useRouter } from "expo-router";
 import ActivityCard from "../components/ActivityCard";
 import { activities as initialActivities } from "../data/activity";
 import { Activity } from "../types/activity";
 
 export default function Index() {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -57,6 +59,21 @@ export default function Index() {
 
   return (
     <View style={{ flex: 1, padding: 16 }}>
+      <Pressable
+        onPress={() => router.push("/api-demo")}
+        style={{
+          alignSelf: "flex-start",
+          paddingVertical: 10,
+          paddingHorizontal: 14,
+          marginBottom: 16,
+          borderRadius: 8,
+          backgroundColor: "#2f80ed",
+        }}
+      >
+        <Text style={{ color: "white", fontWeight: "600" }}>
+          Lihat Data dari External API
+        </Text>
+      </Pressable>
       <View
         style={{
           flexDirection: "row",
