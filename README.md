@@ -10,10 +10,20 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
    npm install
    ```
 
-2. Start the app
+2. Set up Supabase Authentication
+
+   Set `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` in `.env`
+   to your Supabase project URL and publishable (or legacy anon) key. These
+   values are public client credentials; never put a service-role key in the app.
+
+   Enable Email authentication in the Supabase project. If email confirmation is
+   enabled, sign-up requires confirming the link sent to the supplied email
+   before signing in.
+
+3. Start the app
 
    ```bash
-   npx expo start
+   npx expo start --clear
    ```
 
 In the output, you'll find options to open the app in a
@@ -22,6 +32,14 @@ In the output, you'll find options to open the app in a
 - [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
 - [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
 - [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+
+Authentication session tokens use Expo SecureStore on iOS and Android and persist
+across app restarts. Web builds use browser `localStorage`; it is not equivalent
+to native secure storage. Restart Expo after changing `.env` values.
+
+To test authentication, open **Akun Activin**, create an account, confirm the
+email if required, sign in, close and reopen the app, then open the account page
+to verify the session is restored. Use **Keluar** to sign out.
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 

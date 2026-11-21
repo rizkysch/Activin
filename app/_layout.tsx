@@ -5,7 +5,7 @@ export default function RootLayout() {
     <Stack
       screenOptions={{
         headerStyle: {
-          backgroundColor: "#2f80ed",
+          backgroundColor: "#142443",
         },
         headerTintColor: "#fff",
         headerTitleStyle: {
@@ -13,11 +13,12 @@ export default function RootLayout() {
         },
         headerShadowVisible: false,
         contentStyle: {
-          backgroundColor: "#f5f5f5",
+          backgroundColor: "#f4f7fb",
         },
       }}
     >
       <Stack.Screen name="index" options={{ title: "Aktivitas" }} />
+      <Stack.Screen name="auth" options={{ title: "Akun" }} />
       <Stack.Screen
         name="activity/[id]"
         options={{ title: "Detail Aktivitas" }}

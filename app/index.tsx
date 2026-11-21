@@ -10,6 +10,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { router } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import ActivityCard from "../components/ActivityCard";
 import { createActivityOnApi, fetchActivities, NewActivityInput } from "../data/activity";
@@ -39,6 +40,7 @@ export default function Index() {
   const [newActivity, setNewActivity] = useState<NewActivityInput>({
     title: "", category: "Workshop", location: "", date: "", time: "", maxParticipants: 5,
   });
+  const [isCreateFormVisible, setIsCreateFormVisible] = useState(false);
   const [isCreatingActivity, setIsCreatingActivity] = useState(false);
   const [createActivityResult, setCreateActivityResult] = useState<string | null>(null);
   const [createActivityError, setCreateActivityError] = useState<string | null>(null);
@@ -201,12 +203,15 @@ export default function Index() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <FlatList
-        style={{ flex: 1 }}
+        style={{ flex: 1, backgroundColor: "#f4f7fb" }}
         contentContainerStyle={{
           flexGrow: 1,
-          paddingHorizontal: 16,
-          paddingTop: 16,
-          paddingBottom: 32,
+          width: "100%",
+          maxWidth: 1040,
+          alignSelf: "center",
+          paddingHorizontal: 20,
+          paddingTop: 24,
+          paddingBottom: 48,
         }}
         data={isLoading ? [] : filteredActivities}
         keyExtractor={(activity) => activity.id.toString()}
@@ -215,29 +220,117 @@ export default function Index() {
           <View>
             <View
               style={{
-                marginBottom: 16,
-                padding: 14,
-                borderRadius: 12,
-                backgroundColor: "white",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: 20,
+                gap: 12,
               }}
             >
-              <Text style={{ fontSize: 18, fontWeight: "700", color: "#111827" }}>
-                Cuaca {weather?.location ?? "Malang"}
-              </Text>
+              <View style={{ flex: 1 }}>
+                <Text
+                  style={{
+                    color: "#2f80ed",
+                    fontSize: 12,
+                    fontWeight: "800",
+                    letterSpacing: 1.4,
+                  }}
+                >
+                  ACTIVIN · MALANG
+                </Text>
+                <Text
+                  style={{
+                    marginTop: 6,
+                    color: "#142443",
+                    fontSize: 28,
+                    fontWeight: "800",
+                  }}
+                >
+                  Cari kegiatan seru
+                </Text>
+                <Text style={{ marginTop: 4, color: "#68758a", fontSize: 15 }}>
+                  Temukan teman dan aktivitas baru di sekitarmu.
+                </Text>
+              </View>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Buka akun Activin"
+                onPress={() => router.push("./auth")}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 7,
+                  paddingHorizontal: 13,
+                  paddingVertical: 11,
+                  borderRadius: 14,
+                  backgroundColor: "white",
+                  borderWidth: 1,
+                  borderColor: "#e5eaf2",
+                }}
+              >
+                <Ionicons name="person-outline" size={18} color="#2f80ed" />
+                <Text style={{ color: "#2f80ed", fontWeight: "700" }}>Akun</Text>
+              </Pressable>
+            </View>
+            <View
+              style={{
+                marginBottom: 18,
+                padding: 18,
+                borderRadius: 18,
+                backgroundColor: "#e8f4ff",
+                borderWidth: 1,
+                borderColor: "#d8eaff",
+              }}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                <View
+                  style={{
+                    width: 44,
+                    height: 44,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 15,
+                    backgroundColor: "white",
+                  }}
+                >
+                  <Ionicons
+                    name={weather ? "partly-sunny-outline" : "cloud-outline"}
+                    size={24}
+                    color="#2f80ed"
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: "#58708f", fontSize: 13, fontWeight: "600" }}>
+                    CUACA SEKARANG · {weather?.location ?? "MALANG"}
+                  </Text>
+                  {weather ? (
+                    <Text style={{ marginTop: 3, color: "#142443", fontSize: 18, fontWeight: "700" }}>
+                      {weather.description}
+                    </Text>
+                  ) : weatherError ? (
+                    <Text style={{ marginTop: 3, color: "#b91c1c", fontWeight: "600" }}>
+                      Cuaca tidak tersedia
+                    </Text>
+                  ) : (
+                    <Text style={{ marginTop: 3, color: "#142443", fontWeight: "600" }}>
+                      Memuat cuaca...
+                    </Text>
+                  )}
+                </View>
+                {weather ? (
+                  <Text style={{ color: "#142443", fontSize: 26, fontWeight: "800" }}>
+                    {weather.temperature}°
+                  </Text>
+                ) : null}
+              </View>
               {weather ? (
                 <>
-                  <Text style={{ marginTop: 6, fontSize: 16, color: "#374151" }}>
-                    {weather.description} · {weather.temperature}°C
-                  </Text>
-                  <Text style={{ marginTop: 4, color: "#4b5563" }}>
+                  <Text style={{ marginTop: 14, color: "#52647c", lineHeight: 20 }}>
                     Terasa {weather.feelsLike}°C · Kelembapan {weather.humidity}% ·
                     Angin {weather.windSpeed} km/jam
                   </Text>
-                  <Text style={{ marginTop: 4, fontSize: 12, color: "#6b7280" }}>
-                    Waktu data: {weather.observedAt.replace("T", " ")}
-                  </Text>
-                  <Text style={{ marginTop: 4, fontSize: 12, color: "#6b7280" }}>
-                    Diperbarui otomatis tiap 15 menit saat aplikasi aktif.
+                  <Text style={{ marginTop: 6, fontSize: 12, color: "#71829a" }}>
+                    Diperbarui otomatis tiap 15 menit
                   </Text>
                   {weatherError ? (
                     <Text style={{ marginTop: 4, color: "#b91c1c" }}>
@@ -248,64 +341,85 @@ export default function Index() {
                 </>
               ) : weatherError ? (
                 <View>
-                  <Text style={{ marginTop: 6, color: "#b91c1c" }}>
+                  <Text style={{ marginTop: 8, color: "#b91c1c", fontSize: 12 }}>
                     {weatherError}
                   </Text>
-                  <Pressable
-                    onPress={() => setWeatherReloadKey((current) => current + 1)}
-                    style={{ marginTop: 8 }}
-                  >
-                    <Text style={{ color: "#2f80ed", fontWeight: "600" }}>
-                      Coba lagi
-                    </Text>
-                  </Pressable>
                 </View>
-              ) : (
-                <Text style={{ marginTop: 6, color: "#4b5563" }}>
-                  Memuat data cuaca...
+              ) : null}
+              <Pressable
+                accessibilityRole="button"
+                disabled={isRefreshingWeather}
+                onPress={() => setWeatherReloadKey((current) => current + 1)}
+                style={{
+                  alignSelf: "flex-start",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 6,
+                  marginTop: 10,
+                  paddingHorizontal: 11,
+                  paddingVertical: 8,
+                  borderRadius: 10,
+                  backgroundColor: "white",
+                }}
+              >
+                {isRefreshingWeather ? (
+                  <ActivityIndicator size="small" color="#2f80ed" />
+                ) : (
+                  <Ionicons name="refresh-outline" size={15} color="#2f80ed" />
+                )}
+                <Text style={{ color: "#2f80ed", fontSize: 12, fontWeight: "700" }}>
+                  {isRefreshingWeather ? "Memperbarui..." : "Perbarui cuaca"}
                 </Text>
-              )}
+              </Pressable>
             </View>
             <View
               style={{
-                marginBottom: 16,
-                padding: 14,
-                borderRadius: 12,
+                marginBottom: 18,
+                padding: 18,
+                borderRadius: 18,
                 backgroundColor: "white",
+                borderWidth: 1,
+                borderColor: "#e8edf5",
               }}
             >
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityState={{ expanded: isCreateFormVisible }}
+                onPress={() => setIsCreateFormVisible((visible) => !visible)}
+                style={{ flexDirection: "row", alignItems: "center", gap: 12 }}
+              >
                 <View
                   style={{
-                    width: 40,
-                    height: 40,
+                    width: 44,
+                    height: 44,
                     alignItems: "center",
                     justifyContent: "center",
-                    borderRadius: 12,
+                    borderRadius: 15,
                     backgroundColor: "#eff6ff",
                   }}
                 >
-                  <Ionicons name="git-branch-outline" size={20} color="#2f80ed" />
+                  <Ionicons name="add" size={25} color="#2f80ed" />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 18, fontWeight: "700", color: "#111827" }}>
-                    Demo Promise
+                  <Text style={{ fontSize: 16, fontWeight: "700", color: "#142443" }}>
+                    Buat aktivitas
                   </Text>
-                  <Text style={{ marginTop: 2, fontSize: 13, color: "#6b7280" }}>
-                    resolve, reject, dan then
+                  <Text style={{ marginTop: 3, fontSize: 13, color: "#7b8799" }}>
+                    Bagikan kegiatan dan ajak teman
                   </Text>
                 </View>
-              </View>
-              <Text style={{ marginTop: 12, color: "#4b5563", lineHeight: 20 }}>
-                Form valid diteruskan melalui Promise.resolve() ke proses API dan .then().
-                Input tidak lengkap menghasilkan Promise.reject() dan ditampilkan sebagai error.
-              </Text>
-              <Text style={{ marginTop: 14, fontWeight: "600", color: "#374151" }}>
-                Buat aktivitas baru
-              </Text>
-              <Text style={{ marginTop: 4, fontSize: 12, color: "#6b7280" }}>
-                Custom async function memvalidasi formulir, mengirim POST ke API, lalu menambahkan hasil ke daftar.
-              </Text>
+                <Ionicons
+                  name={isCreateFormVisible ? "chevron-up" : "chevron-down"}
+                  size={20}
+                  color="#71829a"
+                />
+              </Pressable>
+              {isCreateFormVisible ? (
+                <View style={{ marginTop: 16 }}>
+                  <Text style={{ marginBottom: 8, color: "#71829a", lineHeight: 20 }}>
+                    Isi detail kegiatanmu. Form divalidasi sebelum dikirim; semua
+                    kolom wajib diisi.
+                  </Text>
               {([
                 ["Judul aktivitas", "Contoh: Lari pagi bersama", "title"],
                 ["Lokasi", "Contoh: Alun-alun Malang", "location"],
@@ -325,17 +439,17 @@ export default function Index() {
                   }}
                   style={{
                     marginTop: 8,
-                    minHeight: 44,
-                    paddingHorizontal: 12,
+                    minHeight: 48,
+                    paddingHorizontal: 14,
                     borderWidth: 1,
-                    borderColor: "#d1d5db",
-                    borderRadius: 8,
-                    backgroundColor: "#f9fafb",
-                    color: "#111827",
+                    borderColor: "#e2e8f0",
+                    borderRadius: 12,
+                    backgroundColor: "#f8fafc",
+                    color: "#142443",
                   }}
                 />
               ))}
-              <Text style={{ marginTop: 12, fontSize: 13, fontWeight: "600", color: "#374151" }}>
+              <Text style={{ marginTop: 14, fontSize: 13, fontWeight: "700", color: "#52647c" }}>
                 Kategori
               </Text>
               <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
@@ -346,12 +460,12 @@ export default function Index() {
                     onPress={() => setNewActivity((current) => ({ ...current, category }))}
                     style={{
                       paddingHorizontal: 12,
-                      paddingVertical: 8,
-                      borderRadius: 8,
-                      backgroundColor: newActivity.category === category ? "#2f80ed" : "#e5e7eb",
+                      paddingVertical: 9,
+                      borderRadius: 12,
+                      backgroundColor: newActivity.category === category ? "#2f80ed" : "#f1f5f9",
                     }}
                   >
-                    <Text style={{ color: newActivity.category === category ? "white" : "#374151", fontWeight: "600" }}>
+                    <Text style={{ color: newActivity.category === category ? "white" : "#52647c", fontWeight: "600" }}>
                       {category}
                     </Text>
                   </Pressable>
@@ -369,13 +483,13 @@ export default function Index() {
                 }}
                 style={{
                   marginTop: 8,
-                  minHeight: 44,
-                  paddingHorizontal: 12,
+                  minHeight: 48,
+                  paddingHorizontal: 14,
                   borderWidth: 1,
-                  borderColor: "#d1d5db",
-                  borderRadius: 8,
-                  backgroundColor: "#f9fafb",
-                  color: "#111827",
+                  borderColor: "#e2e8f0",
+                  borderRadius: 12,
+                  backgroundColor: "#f8fafc",
+                  color: "#142443",
                 }}
               />
               <Pressable
@@ -384,11 +498,11 @@ export default function Index() {
                 onPress={handleCreateActivity}
                 style={{
                   marginTop: 8,
-                  minHeight: 46,
+                  minHeight: 48,
                   alignItems: "center",
                   justifyContent: "center",
                   paddingHorizontal: 14,
-                  borderRadius: 10,
+                  borderRadius: 12,
                   backgroundColor: isCreatingActivity ? "#93c5fd" : "#2f80ed",
                 }}
               >
@@ -423,70 +537,25 @@ export default function Index() {
                   <Text style={{ color: "#b91c1c", lineHeight: 20 }}>{createActivityError}</Text>
                 </View>
               ) : null}
-              <Text style={{ marginTop: 14, fontWeight: "600", color: "#374151" }}>
-                Pre-built Async Functions
-              </Text>
-              <View
-                style={{
-                  flexDirection: "row",
-                  flexWrap: "wrap",
-                  gap: 8,
-                  marginTop: 8,
-                }}
-              >
-                <Pressable
-                  accessibilityRole="button"
-                  disabled={isReloadingActivities}
-                  onPress={() => void handleReloadActivities()}
-                  style={{
-                    paddingVertical: 8,
-                    paddingHorizontal: 12,
-                    borderRadius: 8,
-                    backgroundColor: "#e5e7eb",
-                  }}
-                >
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                    {isReloadingActivities ? (
-                      <ActivityIndicator size="small" color="#2f80ed" />
-                    ) : null}
-                    <Text style={{ color: "#374151", fontWeight: "600" }}>
-                      {isReloadingActivities ? "Memuat..." : "Muat ulang aktivitas"}
-                    </Text>
-                  </View>
-                </Pressable>
-                <Pressable
-                  accessibilityRole="button"
-                  disabled={isRefreshingWeather}
-                  onPress={() => setWeatherReloadKey((current) => current + 1)}
-                  style={{
-                    paddingVertical: 8,
-                    paddingHorizontal: 12,
-                    borderRadius: 8,
-                    backgroundColor: "#e5e7eb",
-                  }}
-                >
-                  <Text style={{ color: "#374151", fontWeight: "600" }}>
-                    {isRefreshingWeather ? "Memperbarui cuaca..." : "Perbarui cuaca"}
-                  </Text>
-                </Pressable>
-              </View>
-              {activityReloadError ? (
-                <Text style={{ marginTop: 8, color: "#b91c1c" }}>
-                  {activityReloadError}
-                </Text>
+                </View>
               ) : null}
             </View>
+            {activityReloadError ? (
+              <Text style={{ marginBottom: 12, color: "#b91c1c" }}>
+                {activityReloadError}
+              </Text>
+            ) : null}
             <View
               style={{
                 flexDirection: "row",
                 alignItems: "center",
                 borderWidth: 1,
-                borderColor: "#d1d5db",
-                borderRadius: 10,
+                borderColor: "#e5eaf2",
+                borderRadius: 14,
                 backgroundColor: "white",
-                paddingHorizontal: 14,
-                marginBottom: 16,
-                minHeight: 50,
+                paddingHorizontal: 16,
+                marginBottom: 14,
+                minHeight: 54,
               }}
             >
               <Ionicons name="search" size={18} color="#6b7280" />
@@ -508,7 +577,7 @@ export default function Index() {
                   outlineStyle: "solid",
                   outlineWidth: 0,
                   outlineColor: "transparent",
-                  color: "#111827",
+                  color: "#142443",
                   fontSize: 16,
                 }}
               />
@@ -518,8 +587,8 @@ export default function Index() {
               style={{
                 flexDirection: "row",
                 flexWrap: "wrap",
-                marginBottom: 16,
-                gap: 8,
+                marginBottom: 20,
+                gap: 10,
               }}
             >
               {categories.map((category) => (
@@ -527,17 +596,17 @@ export default function Index() {
                   key={category}
                   onPress={() => setSelectedCategory(category)}
                   style={{
-                    paddingVertical: 8,
+                    paddingVertical: 9,
                     paddingHorizontal: 12,
-                    borderRadius: 8,
+                    borderRadius: 12,
                     backgroundColor:
-                      selectedCategory === category ? "#2f80ed" : "#e5e7eb",
+                      selectedCategory === category ? "#142443" : "#e8edf5",
                   }}
                 >
                   <Text
                     style={{
                       color:
-                        selectedCategory === category ? "white" : "#374151",
+                        selectedCategory === category ? "white" : "#52647c",
                       fontWeight: "600",
                     }}
                   >
@@ -562,20 +631,44 @@ export default function Index() {
                   Temukan kegiatan yang cocok untukmu
                 </Text>
               </View>
-              <View
-                style={{
-                  minWidth: 36,
-                  minHeight: 32,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  paddingHorizontal: 10,
-                  borderRadius: 16,
-                  backgroundColor: "#eff6ff",
-                }}
-              >
-                <Text style={{ color: "#2f80ed", fontWeight: "700" }}>
-                  {filteredActivities.length}
-                </Text>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Muat ulang aktivitas"
+                  disabled={isReloadingActivities}
+                  onPress={() => void handleReloadActivities()}
+                  style={{
+                    width: 36,
+                    height: 36,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 12,
+                    backgroundColor: "white",
+                    borderWidth: 1,
+                    borderColor: "#e5eaf2",
+                  }}
+                >
+                  {isReloadingActivities ? (
+                    <ActivityIndicator size="small" color="#2f80ed" />
+                  ) : (
+                    <Ionicons name="refresh-outline" size={17} color="#52647c" />
+                  )}
+                </Pressable>
+                <View
+                  style={{
+                    minWidth: 36,
+                    minHeight: 32,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    paddingHorizontal: 10,
+                    borderRadius: 16,
+                    backgroundColor: "#e7f0ff",
+                  }}
+                >
+                  <Text style={{ color: "#2f80ed", fontWeight: "700" }}>
+                    {filteredActivities.length}
+                  </Text>
+                </View>
               </View>
             </View>
           </View>
