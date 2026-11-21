@@ -1,6 +1,7 @@
 import { Stack } from "expo-router";
+import { AuthProvider } from "../contexts/AuthContext";
 
-export default function RootLayout() {
+function RootStack() {
   return (
     <Stack
       screenOptions={{
@@ -24,5 +25,13 @@ export default function RootLayout() {
         options={{ title: "Detail Aktivitas" }}
       />
     </Stack>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <RootStack />
+    </AuthProvider>
   );
 }

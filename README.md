@@ -26,6 +26,12 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
    npx expo start --clear
    ```
 
+Authentication state is shared through `AuthProvider` and synchronized with
+Supabase using `onAuthStateChange`. The activity feed remains public; opening
+an activity detail requires a signed-in session and redirects signed-out users
+to **Akun Activin**. That screen also remains available to signed-in users for
+account and sign-out actions.
+
 In the output, you'll find options to open the app in a
 
 - [development build](https://docs.expo.dev/develop/development-builds/introduction/)

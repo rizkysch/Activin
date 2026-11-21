@@ -10,10 +10,19 @@ import {
 } from "react-native";
 
 import { router, useLocalSearchParams } from "expo-router";
+import AuthGuard from "../../components/AuthGuard";
 import { fetchActivities } from "../../data/activity";
 import { Activity } from "../../types/activity";
 
 export default function ActivityDetailScreen() {
+  return (
+    <AuthGuard>
+      <ActivityDetailContent />
+    </AuthGuard>
+  );
+}
+
+function ActivityDetailContent() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const [activity, setActivity] = useState<Activity | null>(null);
   const [isLoading, setIsLoading] = useState(true);

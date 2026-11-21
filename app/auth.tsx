@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -10,65 +10,20 @@ import {
   View,
 } from "react-native";
 import { router } from "expo-router";
-import type { User } from "@supabase/supabase-js";
 import { signInWithEmail, signOut, signUpWithEmail } from "../lib/auth";
-import { isSupabaseConfigured, getSupabaseClient } from "../lib/supabase";
+import { useAuth } from "../contexts/AuthContext";
+import { isSupabaseConfigured } from "../lib/supabase";
 
 type AuthMode = "signIn" | "signUp";
 
 export default function AuthScreen() {
+  const { user, isLoading: isCheckingSession, error: sessionError } = useAuth();
   const [mode, setMode] = useState<AuthMode>("signIn");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [user, setUser] = useState<User | null>(null);
-  const [isCheckingSession, setIsCheckingSession] = useState(
-    isSupabaseConfigured,
-  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!isSupabaseConfigured) {
-      return;
-    }
-
-    let isMounted = true;
-    const client = getSupabaseClient();
-    const {
-      data: { subscription },
-    } = client.auth.onAuthStateChange((_event, session) => {
-      if (isMounted) {
-        setUser(session?.user ?? null);
-        setIsCheckingSession(false);
-      }
-    });
-
-    void client.auth
-      .getSession()
-      .then(({ data, error }) => {
-        if (!isMounted) return;
-        if (error) {
-          setErrorMessage(error.message);
-        } else {
-          setUser(data.session?.user ?? null);
-        }
-        setIsCheckingSession(false);
-      })
-      .catch((error: unknown) => {
-        if (isMounted) {
-          setErrorMessage(
-            error instanceof Error ? error.message : "Gagal memuat sesi.",
-          );
-          setIsCheckingSession(false);
-        }
-      });
-
-    return () => {
-      isMounted = false;
-      subscription.unsubscribe();
-    };
-  }, []);
 
   const handleSubmit = async () => {
     setErrorMessage(null);
@@ -311,7 +266,9 @@ export default function AuthScreen() {
             </>
           ) : null}
 
-          {errorMessage ? showMessage(errorMessage, true) : null}
+          {errorMessage || sessionError
+            ? showMessage(errorMessage ?? sessionError ?? "", true)
+            : null}
           {notice ? showMessage(notice, false) : null}
         </View>
       </ScrollView>
