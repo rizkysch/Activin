@@ -1,4 +1,5 @@
 import { Activity } from "../types/activity";
+import { getSupabaseClient, isSupabaseConfigured } from "../lib/supabase";
 
 const ACTIVITIES_API_URL = "https://dummyjson.com/todos?limit=8";
 const categoryOptions = ["Movie", "Sport", "Game", "Workshop"];
@@ -82,6 +83,32 @@ interface CreatedTodoResponse {
   todo: string;
 }
 
+interface SupabaseActivityRow {
+  id: number;
+  title: string;
+  category: string;
+  location: string;
+  date: string;
+  time: string;
+  participants: number;
+  max_participants: number;
+  image_url: string;
+}
+
+function mapSupabaseActivity(row: SupabaseActivityRow): Activity {
+  return {
+    id: row.id,
+    title: row.title,
+    category: row.category,
+    location: row.location,
+    date: row.date,
+    time: row.time,
+    participants: row.participants,
+    maxParticipants: row.max_participants,
+    imageUrl: row.image_url,
+  };
+}
+
 function isTodoApiResponse(value: unknown): value is TodoApiResponse {
   if (typeof value !== "object" || value === null || !("todos" in value)) {
     return false;
@@ -102,6 +129,23 @@ function isTodoApiResponse(value: unknown): value is TodoApiResponse {
 }
 
 export async function fetchActivities(): Promise<Activity[]> {
+  if (isSupabaseConfigured) {
+    const { data, error } = await getSupabaseClient()
+      .from("activities")
+      .select("id,title,category,location,date,time,participants,max_participants,image_url")
+      .order("id", { ascending: false })
+      .limit(1000);
+
+    if (error) {
+      throw new Error(`Gagal mengambil aktivitas dari Supabase: ${error.message}`);
+    }
+
+    return [
+      ...sessionCreatedActivities,
+      ...(data as SupabaseActivityRow[]).map(mapSupabaseActivity),
+    ];
+  }
+
   const response = await fetch(ACTIVITIES_API_URL);
   if (!response.ok) {
     throw new Error(`Gagal mengambil aktivitas (HTTP ${response.status}).`);
@@ -130,7 +174,51 @@ export async function fetchActivities(): Promise<Activity[]> {
   return [...sessionCreatedActivities, ...fetchedActivities];
 }
 
+export async function fetchActivityById(id: number): Promise<Activity | null> {
+  if (isSupabaseConfigured) {
+    const { data, error } = await getSupabaseClient()
+      .from("activities")
+      .select("id,title,category,location,date,time,participants,max_participants,image_url")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error(`Gagal mengambil detail aktivitas: ${error.message}`);
+    }
+
+    return data ? mapSupabaseActivity(data as SupabaseActivityRow) : null;
+  }
+
+  const allActivities = await fetchActivities();
+  return allActivities.find((activity) => activity.id === id) ?? null;
+}
+
 export async function createActivityOnApi(input: NewActivityInput): Promise<Activity> {
+  if (isSupabaseConfigured) {
+    const { data, error } = await getSupabaseClient()
+      .from("activities")
+      .insert({
+        title: input.title,
+        category: input.category,
+        location: input.location,
+        date: input.date,
+        time: input.time,
+        participants: 1,
+        max_participants: input.maxParticipants,
+        image_url: activityImages[input.category] ?? activityImages.Workshop,
+      })
+      .select("id,title,category,location,date,time,participants,max_participants,image_url")
+      .single();
+
+    if (error) {
+      throw new Error(`Gagal membuat aktivitas di Supabase: ${error.message}`);
+    }
+
+    const createdActivity = mapSupabaseActivity(data as SupabaseActivityRow);
+    sessionCreatedActivities.unshift(createdActivity);
+    return createdActivity;
+  }
+
   const response = await fetch("https://dummyjson.com/todos/add", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

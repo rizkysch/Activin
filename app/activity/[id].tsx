@@ -11,7 +11,7 @@ import {
 
 import { router, useLocalSearchParams } from "expo-router";
 import AuthGuard from "../../components/AuthGuard";
-import { fetchActivities } from "../../data/activity";
+import { fetchActivityById } from "../../data/activity";
 import { Activity } from "../../types/activity";
 
 export default function ActivityDetailScreen() {
@@ -34,8 +34,7 @@ function ActivityDetailContent() {
     let isMounted = true;
     const loadActivity = async () => {
       try {
-        const allActivities = await fetchActivities();
-        const foundActivity = allActivities.find((item) => item.id.toString() === id);
+        const foundActivity = id ? await fetchActivityById(Number(id)) : null;
         if (isMounted) {
           setActivity(foundActivity ?? null);
           setParticipants(foundActivity?.participants ?? 0);
